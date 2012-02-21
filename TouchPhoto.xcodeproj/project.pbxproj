@@ -21,6 +21,9 @@
 		FCA1EB1414F3829300FAE9FA /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCA1EB1314F3829300FAE9FA /* OpenGLES.framework */; };
 		FCA1EB1614F3829900FAE9FA /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCA1EB1514F3829900FAE9FA /* QuartzCore.framework */; };
 		FCA1EB1814F382A400FAE9FA /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCA1EB1714F382A400FAE9FA /* GLKit.framework */; };
+		FCA1EB2214F3A89C00FAE9FA /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FCA1EB2114F3A89C00FAE9FA /* MainStoryboard.storyboard */; };
+		FCA1EB2614F3A97700FAE9FA /* CanvasViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FCA1EB2514F3A97700FAE9FA /* CanvasViewController.m */; };
+		FCA1EB2A14F3B45C00FAE9FA /* foolish-and-hungry.png in Resources */ = {isa = PBXBuildFile; fileRef = FCA1EB2914F3B45C00FAE9FA /* foolish-and-hungry.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +56,10 @@
 		FCA1EB1314F3829300FAE9FA /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		FCA1EB1514F3829900FAE9FA /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		FCA1EB1714F382A400FAE9FA /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
+		FCA1EB2114F3A89C00FAE9FA /* MainStoryboard.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MainStoryboard.storyboard; sourceTree = "<group>"; };
+		FCA1EB2414F3A97700FAE9FA /* CanvasViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CanvasViewController.h; sourceTree = "<group>"; };
+		FCA1EB2514F3A97700FAE9FA /* CanvasViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CanvasViewController.m; sourceTree = "<group>"; };
+		FCA1EB2914F3B45C00FAE9FA /* foolish-and-hungry.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "foolish-and-hungry.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,9 +125,13 @@
 		FCA1EAEA14F3823900FAE9FA /* TouchPhoto */ = {
 			isa = PBXGroup;
 			children = (
+				FCA1EB2914F3B45C00FAE9FA /* foolish-and-hungry.png */,
 				FCA1EAF314F3823900FAE9FA /* AppDelegate.h */,
 				FCA1EAF414F3823900FAE9FA /* AppDelegate.m */,
 				FCA1EAEB14F3823900FAE9FA /* Supporting Files */,
+				FCA1EB2114F3A89C00FAE9FA /* MainStoryboard.storyboard */,
+				FCA1EB2414F3A97700FAE9FA /* CanvasViewController.h */,
+				FCA1EB2514F3A97700FAE9FA /* CanvasViewController.m */,
 			);
 			path = TouchPhoto;
 			sourceTree = "<group>";
@@ -227,6 +238,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				FCA1EAEF14F3823900FAE9FA /* InfoPlist.strings in Resources */,
+				FCA1EB2214F3A89C00FAE9FA /* MainStoryboard.storyboard in Resources */,
+				FCA1EB2A14F3B45C00FAE9FA /* foolish-and-hungry.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -263,6 +276,7 @@
 			files = (
 				FCA1EAF114F3823900FAE9FA /* main.m in Sources */,
 				FCA1EAF514F3823900FAE9FA /* AppDelegate.m in Sources */,
+				FCA1EB2614F3A97700FAE9FA /* CanvasViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -426,6 +440,7 @@
 				FCA1EB0F14F3823A00FAE9FA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		FCA1EB1014F3823A00FAE9FA /* Build configuration list for PBXNativeTarget "TouchPhotoTests" */ = {
 			isa = XCConfigurationList;
@@ -434,6 +449,7 @@
 				FCA1EB1214F3823A00FAE9FA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
