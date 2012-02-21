@@ -10,4 +10,6 @@
 
 @interface CanvasViewController : GLKViewController
 
+
+- (void)panWithVector:(CGPoint)vector;
 @end

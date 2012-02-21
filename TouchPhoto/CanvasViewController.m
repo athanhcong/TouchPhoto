@@ -33,8 +33,15 @@ const GLubyte Indices[] = {
     GLuint _vertexBuffer;
     GLuint _indexBuffer;   
     GLuint _vertexArray;
+    
+    // Translate
     float _rotation;
     float _zooming;
+    float _panX;
+    float _panY;
+    
+    //multitouch
+    NSInteger _numberOfTouches;
     
 }
 @property (strong, nonatomic) EAGLContext *context;
@@ -64,6 +71,17 @@ const GLubyte Indices[] = {
     // Release any cached data, images, etc that aren't in use.
 }
 
+#pragma mark Transforming
+
+- (void)resetTransform {
+    _rotation = 90;
+    _zooming = 4;
+//    _zooming = 1;    
+    _panX = 0;
+    _panY = 0;
+}
+
+
 #pragma mark - View lifecycle
 
 /*
@@ -75,10 +93,10 @@ const GLubyte Indices[] = {
 - (void)setupGL {
     //KONG: move from const in header into this method, so that we can modify it to fit image's width/height
     Vertex Vertices[] = {
-        {{1, -1, 1}, {1, 0}},
-        {{1, 1, 1}, {1, 1}},
-        {{-1, 1, 1}, {0, 1}},
-        {{-1, -1, 1}, {0, 0}},
+        {{1, -1, 0}, {1, 0}},
+        {{1, 1, 0}, {1, 1}},
+        {{-1, 1, 0}, {0, 1}},
+        {{-1, -1, 0}, {0, 0}},
     };
 
     
@@ -98,8 +116,9 @@ const GLubyte Indices[] = {
     if (info == nil) {
         NSLog(@"Error loading file: %@", [error localizedDescription]);
     } else {
-        NSLog(@"Loaded texture: %u %u", info.width, info.height);
         //KONG: adjust drawing Rectangle, in respect to image's width, height
+        
+//        NSLog(@"Loaded texture: %u %u", info.width, info.height);        
         for (int i= 0; i< sizeof(Vertices)/sizeof(Vertex); i++) {
 //            NSLog(@"Loaded texture: %f", Vertices[i].Position[1]);
             Vertices[i].Position[1] *= (float)info.height/info.width;
@@ -131,7 +150,6 @@ const GLubyte Indices[] = {
     
     // New line
     glBindVertexArrayOES(0);
-    
 }
 
 - (void)tearDownGL {
@@ -160,6 +178,7 @@ const GLubyte Indices[] = {
     view.context = self.context;
     
     [self setupGL];
+    [self resetTransform];
 }
 
 
@@ -184,10 +203,6 @@ const GLubyte Indices[] = {
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
-#pragma mark Setup OpenGL
-
-
-
 
 #pragma mark - GLKViewDelegate
 
@@ -200,42 +215,70 @@ const GLubyte Indices[] = {
     
     glBindVertexArrayOES(_vertexArray);   
     glDrawElements(GL_TRIANGLES, sizeof(Indices)/sizeof(Indices[0]), GL_UNSIGNED_BYTE, 0);
-
-    
 }
 
+
 #pragma mark - GLKViewControllerDelegate
-static float const projectionNear = 2.0;
+static float const projectionNear = 0;
 static float const projectionFar = 10.0;
 
 - (void)update {
-    float aspect = fabsf(self.view.bounds.size.width / self.view.bounds.size.height);
-    GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(65.0f), aspect, projectionNear, projectionFar);    
+    
+//    float aspect = fabsf(self.view.bounds.size.width / self.view.bounds.size.height);
+//    GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(65.0f), aspect, 0, 10);    
+    
+    CGRect rect = self.view.frame;
+    GLKMatrix4 projectionMatrix = GLKMatrix4MakeOrtho(-1.0, 
+                                                      1.0, 
+                                                      -1.0 / (rect.size.width / rect.size.height), 
+                                                      1.0 / (rect.size.width / rect.size.height), 
+                                                      0.01, 
+                                                      10000.0);
     self.effect.transform.projectionMatrix = projectionMatrix;
     
-    if (_increasing) {
-        _zooming += (projectionFar - projectionNear) * self.timeSinceLastUpdate;        
-    } else {
-        _zooming -= (projectionFar - projectionNear) * self.timeSinceLastUpdate;
-    }
+    GLKMatrix4 modelViewMatrix = GLKMatrix4MakeTranslation( _panX * 2/ (self.view.frame.size.width),
+                                                           - _panY * 2/ (self.view.frame.size.width),
+                                                           -1);
 
-    if (_zooming > projectionFar) {
-        _zooming = projectionFar;
-        _increasing = NO;
-    }
-    
-    if (_zooming <= projectionNear + 1) {
-        _zooming = projectionNear + 1;
-        _increasing = YES;
-    }
-
-    
-    GLKMatrix4 modelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, - _zooming);   
-//    GLKMatrix4 modelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, - 3);       
-    
-    _rotation += 90 * self.timeSinceLastUpdate;
     modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, GLKMathDegreesToRadians(_rotation), 0, 0, 1);    
+    //KONG: we can use GLKMatrix4RotateZ, too
+    
+    modelViewMatrix = GLKMatrix4Scale(modelViewMatrix, 1, 1, 1);
     self.effect.transform.modelviewMatrix = modelViewMatrix;
+}
+
+#pragma mark Handle Multitouch
+
+- (void)panWithVector:(CGPoint)vector {
+//    NSLog(@"panWithVector: %@", NSStringFromCGPoint(vector));    
+    _panX += (float)vector.x;
+    _panY += (float)vector.y;
+//    NSLog(@"panWithVector: %f %f", _panX, _panY);       
+}
+
+
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {	
+//    NSLog(@"touchesBegan: %@", touches);
+    
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+//    NSLog(@"touchesMoved: %@", touches);    
+//    return;
+    UITouch *touch = [touches anyObject];
+    //KONG: move from point A to A_
+    CGPoint pointA_ = [touch locationInView:self.view];
+    CGPoint pointA = [touch previousLocationInView:self.view];
+    [self panWithVector:CGPointMake(pointA_.x - pointA.x, pointA_.y - pointA.y)];
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+//    NSLog(@"touchesEnded: %@", touches);    
+}
+
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+//    NSLog(@"touchesCancelled: %@", touches);    
 }
 
 @end
