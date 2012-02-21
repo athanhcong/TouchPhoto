@@ -13,12 +13,12 @@ typedef struct {
     float TexCoord[2];
 } Vertex;
 
-const Vertex Vertices[] = {
-    {{1, -1, 1}, {1, 0}},
-    {{1, 1, 1}, {1, 1}},
-    {{-1, 1, 1}, {0, 1}},
-    {{-1, -1, 1}, {0, 0}},
-};
+//const Vertex Vertices[] = {
+//    {{1, -1, 1}, {1, 0}},
+//    {{1, 1, 1}, {1, 1}},
+//    {{-1, 1, 1}, {0, 1}},
+//    {{-1, -1, 1}, {0, 0}},
+//};
 
 const GLubyte Indices[] = {
     0, 1, 2,
@@ -73,6 +73,14 @@ const GLubyte Indices[] = {
 }
 */
 - (void)setupGL {
+    //KONG: move from const in header into this method, so that we can modify it to fit image's width/height
+    Vertex Vertices[] = {
+        {{1, -1, 1}, {1, 0}},
+        {{1, 1, 1}, {1, 1}},
+        {{-1, 1, 1}, {0, 1}},
+        {{-1, -1, 1}, {0, 0}},
+    };
+
     
     [EAGLContext setCurrentContext:self.context];
     glEnable(GL_CULL_FACE);
@@ -89,6 +97,13 @@ const GLubyte Indices[] = {
     GLKTextureInfo * info = [GLKTextureLoader textureWithContentsOfFile:path options:options error:&error];
     if (info == nil) {
         NSLog(@"Error loading file: %@", [error localizedDescription]);
+    } else {
+        NSLog(@"Loaded texture: %u %u", info.width, info.height);
+        //KONG: adjust drawing Rectangle, in respect to image's width, height
+        for (int i= 0; i< sizeof(Vertices)/sizeof(Vertex); i++) {
+//            NSLog(@"Loaded texture: %f", Vertices[i].Position[1]);
+            Vertices[i].Position[1] *= (float)info.height/info.width;
+        }
     }
     self.effect.texture2d0.name = info.name;
     self.effect.texture2d0.enabled = true;
