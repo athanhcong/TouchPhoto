@@ -18,6 +18,9 @@
 		FCA1EAFF14F3823A00FAE9FA /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCA1EAE614F3823900FAE9FA /* Foundation.framework */; };
 		FCA1EB0714F3823A00FAE9FA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = FCA1EB0514F3823A00FAE9FA /* InfoPlist.strings */; };
 		FCA1EB0A14F3823A00FAE9FA /* TouchPhotoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FCA1EB0914F3823A00FAE9FA /* TouchPhotoTests.m */; };
+		FCA1EB1414F3829300FAE9FA /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCA1EB1314F3829300FAE9FA /* OpenGLES.framework */; };
+		FCA1EB1614F3829900FAE9FA /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCA1EB1514F3829900FAE9FA /* QuartzCore.framework */; };
+		FCA1EB1814F382A400FAE9FA /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCA1EB1714F382A400FAE9FA /* GLKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,18 +38,21 @@
 		FCA1EAE414F3823900FAE9FA /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		FCA1EAE614F3823900FAE9FA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		FCA1EAE814F3823900FAE9FA /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		FCA1EAEC14F3823900FAE9FA /* TouchPhoto-Info.plist */ = {isa = PBXFileReference; path = "TouchPhoto-Info.plist"; sourceTree = "<group>"; };
+		FCA1EAEC14F3823900FAE9FA /* TouchPhoto-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "TouchPhoto-Info.plist"; sourceTree = "<group>"; };
 		FCA1EAEE14F3823900FAE9FA /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		FCA1EAF014F3823900FAE9FA /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		FCA1EAF214F3823900FAE9FA /* TouchPhoto-Prefix.pch */ = {isa = PBXFileReference; path = "TouchPhoto-Prefix.pch"; sourceTree = "<group>"; };
-		FCA1EAF314F3823900FAE9FA /* AppDelegate.h */ = {isa = PBXFileReference; path = AppDelegate.h; sourceTree = "<group>"; };
+		FCA1EAF214F3823900FAE9FA /* TouchPhoto-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TouchPhoto-Prefix.pch"; sourceTree = "<group>"; };
+		FCA1EAF314F3823900FAE9FA /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		FCA1EAF414F3823900FAE9FA /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		FCA1EAFB14F3823A00FAE9FA /* TouchPhotoTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TouchPhotoTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FCA1EAFC14F3823A00FAE9FA /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
-		FCA1EB0414F3823A00FAE9FA /* TouchPhotoTests-Info.plist */ = {isa = PBXFileReference; path = "TouchPhotoTests-Info.plist"; sourceTree = "<group>"; };
+		FCA1EB0414F3823A00FAE9FA /* TouchPhotoTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "TouchPhotoTests-Info.plist"; sourceTree = "<group>"; };
 		FCA1EB0614F3823A00FAE9FA /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		FCA1EB0814F3823A00FAE9FA /* TouchPhotoTests.h */ = {isa = PBXFileReference; path = TouchPhotoTests.h; sourceTree = "<group>"; };
+		FCA1EB0814F3823A00FAE9FA /* TouchPhotoTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TouchPhotoTests.h; sourceTree = "<group>"; };
 		FCA1EB0914F3823A00FAE9FA /* TouchPhotoTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TouchPhotoTests.m; sourceTree = "<group>"; };
+		FCA1EB1314F3829300FAE9FA /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
+		FCA1EB1514F3829900FAE9FA /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		FCA1EB1714F382A400FAE9FA /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +60,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FCA1EB1814F382A400FAE9FA /* GLKit.framework in Frameworks */,
+				FCA1EB1614F3829900FAE9FA /* QuartzCore.framework in Frameworks */,
+				FCA1EB1414F3829300FAE9FA /* OpenGLES.framework in Frameworks */,
 				FCA1EAE514F3823900FAE9FA /* UIKit.framework in Frameworks */,
 				FCA1EAE714F3823900FAE9FA /* Foundation.framework in Frameworks */,
 				FCA1EAE914F3823900FAE9FA /* CoreGraphics.framework in Frameworks */,
@@ -95,6 +104,9 @@
 		FCA1EAE314F3823900FAE9FA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FCA1EB1714F382A400FAE9FA /* GLKit.framework */,
+				FCA1EB1514F3829900FAE9FA /* QuartzCore.framework */,
+				FCA1EB1314F3829300FAE9FA /* OpenGLES.framework */,
 				FCA1EAE414F3823900FAE9FA /* UIKit.framework */,
 				FCA1EAE614F3823900FAE9FA /* Foundation.framework */,
 				FCA1EAE814F3823900FAE9FA /* CoreGraphics.framework */,
@@ -189,6 +201,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0420;
+				ORGANIZATIONNAME = "BeeDream Studios";
 			};
 			buildConfigurationList = FCA1EADA14F3823900FAE9FA /* Build configuration list for PBXProject "TouchPhoto" */;
 			compatibilityVersion = "Xcode 3.2";

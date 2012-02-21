@@ -3,7 +3,7 @@
 //  TouchPhoto
 //
 //  Created by Vo Thanh Cong on 2/21/12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 BeeDream Studios. All rights reserved.
 //
 
 #import "AppDelegate.h"
@@ -16,7 +16,17 @@
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
-    self.window.backgroundColor = [UIColor whiteColor];
+    
+    EAGLContext *context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+    GLKView *view = [[GLKView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    view.context = context;
+    view.delegate = self;
+    [self.window addSubview:view];
+    
+    
+    
+    
+//    self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
     return YES;
 }
@@ -58,6 +68,13 @@
      Save data if appropriate.
      See also applicationDidEnterBackground:.
      */
+}
+
+
+#pragma mark OpenGL View
+- (void)glkView:(GLKView *)view drawInRect:(CGRect)rect {
+    glClearColor(1.0, 0.0, 0.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 @end
