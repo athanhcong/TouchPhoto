@@ -268,22 +268,35 @@ static float const projectionFar = 10.0;
     return CGPointMake(pointB.x - pointA.x, pointB.y - pointA.y);
 }
 
+//- (CGFloat)angleFrom:(CGPoint)vectorA to:(CGPoint)vectorB {
+//    // dot product of the 2 vectors
+//    float dotProduct = vectorA.x * vectorB.x + vectorA.y * vectorB.y;   
+//    // product of the squared lengths
+//    float productOfLenghs = sqrt((vectorA.x * vectorA.x + vectorA.y * vectorA.y) * (vectorB.x * vectorB.x + vectorB.y * vectorB.y));
+//    
+//    
+//    CGFloat angle;
+//    if (productOfLenghs == 0) {
+//        angle = 0;
+//    } else {
+//        angle = acos(dotProduct / productOfLenghs);
+//    }
+//    
+//    NSLog(@"angle: %f", GLKMathRadiansToDegrees(angle));
+//    
+//    return angle;
+//}
+
 - (CGFloat)angleFrom:(CGPoint)vectorA to:(CGPoint)vectorB {
     // dot product of the 2 vectors
-    float dotProduct = vectorA.x * vectorB.x + vectorA.y * vectorB.y;   
-    // product of the squared lengths
-    float productOfLenghs = sqrt((vectorA.x * vectorA.x + vectorA.y * vectorA.y) * (vectorB.x * vectorB.x + vectorB.y * vectorB.y));
+
+    CGFloat angle1 = atan2(vectorA.y, vectorA.x);
+    NSLog(@"angle1: %f", GLKMathRadiansToDegrees(angle1));    
+    CGFloat angle2 = atan2(vectorB.y, vectorB.x);    
+    NSLog(@"angle2: %f", GLKMathRadiansToDegrees(angle2));    
     
-    
-    CGFloat angle;
-    if (productOfLenghs == 0) {
-        angle = 0;
-    } else {
-        angle = acos(dotProduct / productOfLenghs);
-    }
-    
+    CGFloat angle = angle1 - angle2;
     NSLog(@"angle: %f", GLKMathRadiansToDegrees(angle));
-    
     return angle;
 }
 
@@ -390,23 +403,66 @@ static const CGFloat kZoomMinScale = 0.8;
 //    [self zoomAtPoint:CGPointMake(0, 0) scale:1.5];    
 //    [self zoomAtPoint:[[touches anyObject] locationInView:self.view] scale:1.5];        
 //    [self rotateWithAngle:30];
+    NSLog(@"touches: %d", [touches count]);
+    NSLog(@"event: %d", [[event allTouches] count]);
+    return;
+    
+    //KONG: test
+//    CGPoint pointA = CGPointMake(0, 0);    
+//    CGPoint pointB = CGPointMake(10, 0);
+//    
+//    CGPoint pointA_ = CGPointMake(0, 0);
+//    CGPoint pointB_ = CGPointMake(10, 10);
+
+
+    CGPoint pointA = CGPointMake(0, 0);    
+    CGPoint pointB = CGPointMake(10, 10);
+    
+    CGPoint pointA_ = CGPointMake(0, 0);
+    CGPoint pointB_ = CGPointMake(10, 0);
+
+    
+    
+    //- First. move A to A’ by using a Translation with vector AA’, B is also moved to B1
+    CGPoint vectorAA_ = [self vectorFrom:pointA to:pointA_];
+    [self panWithVector:vectorAA_];
+    
+    // Calculate B1
+    CGPoint pointB1 = [self translatePoint:pointB withVector:vectorAA_];
+    
+    //- Second, move B1 to B2 by using a resize with origin in A’, scale A’B'/A’B1
+    CGFloat scale = [self distanceFrom:pointA_ to:pointB_] / [self distanceFrom:pointA_ to:pointB1];
+    [self zoomAtPoint:pointA_ scale:scale];
+    
+    
+    // Calculate pointB2: vectorA_B2 = scale * vector A_B1
+    //        CGPoint pointB2;
+    //        pointB2.x = scale * (pointB1.x - pointA_.x) + pointA_.x;
+    //        pointB2.y = scale * (pointB1.y - pointA_.y) + pointA_.y;
+    
+    //- Finally, use a Rotation with origin A’, angle (A’B2, A’B') to make vector A’B2 to same direction with A’B', B2 is moved to B’
+    CGPoint vectorAB = [self vectorFrom:pointA to:pointB];
+    CGPoint vectorA_B_ = [self vectorFrom:pointA_ to:pointB_];        
+    //        [self rotateWithAngle:[self angleFrom:vectorA_B_ to:vectorAB]];
+    [self rotateWithAngle:[self angleFrom:vectorAB to:vectorA_B_]];    
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 //    NSLog(@"touchesMoved: %@", touches);    
 //    return;
-    UITouch *touch = [touches anyObject];
+
     //KONG: move from point A to A_
-   
+    NSArray *allTouches = [[event allTouches] allObjects];
     
-    if ([touches count] == 1) {
+    if ([allTouches count] == 1) {
+        UITouch *touch = [allTouches objectAtIndex:0];
         CGPoint pointA_ = [touch locationInView:self.view];
         CGPoint pointA = [touch previousLocationInView:self.view];
         [self panWithVector:CGPointMake(pointA_.x - pointA.x, pointA_.y - pointA.y)];
-    } else if ([touches count] == 2) {
+    } else if ([allTouches count] == 2) {
         
-        UITouch *touchA = [[touches allObjects] objectAtIndex:0];
-        UITouch *touchB = [[touches allObjects] objectAtIndex:1];
+        UITouch *touchA = [allTouches objectAtIndex:0];
+        UITouch *touchB = [allTouches objectAtIndex:1];
         
         CGPoint pointA_ = [touchA locationInView:self.view];
         CGPoint pointA = [touchA previousLocationInView:self.view];
