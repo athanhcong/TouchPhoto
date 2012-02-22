@@ -43,6 +43,8 @@ const GLubyte Indices[] = {
     //multitouch
     NSInteger _numberOfTouches;
     
+    CGSize _screenSize;
+    
 }
 @property (strong, nonatomic) EAGLContext *context;
 @property (strong, nonatomic) GLKBaseEffect *effect;
@@ -74,8 +76,8 @@ const GLubyte Indices[] = {
 #pragma mark Transforming
 
 - (void)resetTransform {
-    _rotation = 90;
-    _zooming = 4;
+    _rotation = 0;
+    _zooming = 1;
 //    _zooming = 1;    
     _panX = 0;
     _panY = 0;
@@ -99,6 +101,7 @@ const GLubyte Indices[] = {
         {{-1, -1, 0}, {0, 0}},
     };
 
+    _screenSize = self.view.frame.size;
     
     [EAGLContext setCurrentContext:self.context];
     glEnable(GL_CULL_FACE);
@@ -243,11 +246,63 @@ static float const projectionFar = 10.0;
     modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, GLKMathDegreesToRadians(_rotation), 0, 0, 1);    
     //KONG: we can use GLKMatrix4RotateZ, too
     
-    modelViewMatrix = GLKMatrix4Scale(modelViewMatrix, 1, 1, 1);
+    modelViewMatrix = GLKMatrix4Scale(modelViewMatrix, _zooming, _zooming, 1);
     self.effect.transform.modelviewMatrix = modelViewMatrix;
 }
 
-#pragma mark Handle Multitouch
+
+#pragma mark OpenGL Utilities
+- (CGFloat)distanceFrom:(CGPoint)pointA to:(CGPoint)pointB {
+	float x = pointB.x - pointA.x;
+    float y = pointB.y - pointA.y;
+    return sqrt(x * x + y * y);
+}
+
+- (CGPoint)pointWithCameraEffect:(CGPoint)location {
+    //KONG: 3 transformation:
+    // move from bottom-left to center
+    // scale
+    // move from center back to bottom-left
+    
+    location.x = (location.x - _screenSize.width/2) * _zooming + _screenSize.width/2;
+    location.y = (location.y - _screenSize.height/2) * _zooming + _screenSize.height/2;
+    
+    location.x += _panX;
+    location.y += _panY;
+    
+    return location;
+}
+
+- (CGPoint)pointWithOutCameraEffect:(CGPoint)location {    
+    location.x -= _panX;
+    location.y -= _panY;
+    
+    //KONG: 3 transformation:
+    // move from bottom-left to center
+    // scale
+    // move from center back to bottom-left
+    
+    location.x = (location.x - _screenSize.width/2)/_zooming + _screenSize.width/2;
+    location.y = (location.y - _screenSize.height/2)/_zooming + _screenSize.height/2;
+    return location;
+}
+
+
+- (CGPoint)convertToGL:(CGPoint)uiPoint {
+	float newY = _screenSize.height - uiPoint.y;
+    CGPoint glPoint = CGPointMake(uiPoint.x, newY );
+	return glPoint;
+}
+
+- (CGPoint)revertFromGL:(CGPoint)glPoint {
+    CGPoint uiPoint = CGPointMake(glPoint.x, glPoint.y);
+	float newY = _screenSize.height - uiPoint.y;
+    uiPoint = CGPointMake(uiPoint.x, newY);
+    
+	return uiPoint;
+}
+
+#pragma mark Handling Multi-touches Events
 
 - (void)panWithVector:(CGPoint)vector {
 //    NSLog(@"panWithVector: %@", NSStringFromCGPoint(vector));    
@@ -256,11 +311,51 @@ static float const projectionFar = 10.0;
 //    NSLog(@"panWithVector: %f %f", _panX, _panY);       
 }
 
+static const CGFloat kZoomMaxScale = 5;
+static const CGFloat kZoomMinScale = 0.8;
 
+- (void)zoomAtPoint:(CGPoint)center scale:(CGFloat)scale {
+    NSLog(@"zoomAtPoint: %@ scale: %f", NSStringFromCGPoint(center), scale);
+    
+    CGPoint A_w = center;
+    
+    CGPoint A_d = [self pointWithOutCameraEffect:A_w];
+    
+    CGPoint A_gl = [self convertToGL:A_d];
+    
+    CGPoint A_t = CGPointMake(A_gl.x - _screenSize.width/2, A_gl.y - _screenSize.height/2);
+    CGPoint Ao_t = CGPointMake(A_t.x * scale, A_t.y * scale); 
+    CGPoint Ao_gl = CGPointMake(Ao_t.x + _screenSize.width/2, Ao_t.y + _screenSize.height/2); 
+        
+    CGPoint Ao_d = [self revertFromGL:Ao_gl];
+    CGPoint Ao_w = [self pointWithCameraEffect:Ao_d];
+    
+    //KONG: moving Ao back to A
+    [self panWithVector:CGPointMake((A_w.x - Ao_w.x), (A_w.y - Ao_w.y))];
+    
+    
+    _zooming *= scale;
+    
+    if (_zooming < kZoomMinScale) {
+        _zooming = kZoomMinScale;
+    } else if (_zooming > kZoomMaxScale) {
+      //  _zooming = kZoomMaxScale;
+    }
+
+}
+
+
+
+- (void)rotateWithAngle:(float)degree {
+    NSLog(@"rotateWithAngle: %f", degree);
+    
+}
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {	
-//    NSLog(@"touchesBegan: %@", touches);
-    
+    NSLog(@"touchesBegan: %@", NSStringFromCGPoint([[touches anyObject] locationInView:self.view]));
+//    [self zoomAtPoint:CGPointMake(_screenSize.width/2, _screenSize.height/2) scale:1.5];
+//    [self zoomAtPoint:CGPointMake(0, 0) scale:1.5];    
+    [self zoomAtPoint:[[touches anyObject] locationInView:self.view] scale:1.5];        
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -268,9 +363,30 @@ static float const projectionFar = 10.0;
 //    return;
     UITouch *touch = [touches anyObject];
     //KONG: move from point A to A_
-    CGPoint pointA_ = [touch locationInView:self.view];
-    CGPoint pointA = [touch previousLocationInView:self.view];
-    [self panWithVector:CGPointMake(pointA_.x - pointA.x, pointA_.y - pointA.y)];
+   
+    
+    if ([touches count] == 1) {
+        CGPoint pointA_ = [touch locationInView:self.view];
+        CGPoint pointA = [touch previousLocationInView:self.view];
+        [self panWithVector:CGPointMake(pointA_.x - pointA.x, pointA_.y - pointA.y)];
+    } else if ([touches count] == 2) {
+//        return;
+        
+        UITouch *touchA = [[touches allObjects] objectAtIndex:0];
+        UITouch *touchB = [[touches allObjects] objectAtIndex:1];
+        
+        CGPoint pointA_ = [touchA locationInView:self.view];
+        CGPoint pointA = [touchA previousLocationInView:self.view];
+        
+        CGPoint pointB_ = [touchB locationInView:self.view];
+        CGPoint pointB = [touchB previousLocationInView:self.view];
+        
+        //- Second, move B1 to B2 by using a resize with origin in A’, scale A’B2/A’B1
+        CGFloat scale = [self distanceFrom:pointA_ to:pointB_] / [self distanceFrom:pointA to:pointB];
+        
+        [self zoomAtPoint:pointA_ scale:scale];
+    }
+    
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {

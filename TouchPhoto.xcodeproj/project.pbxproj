@@ -212,7 +212,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0420;
-				ORGANIZATIONNAME = "BeeDream Studios";
+				ORGANIZATIONNAME = "";
 			};
 			buildConfigurationList = FCA1EADA14F3823900FAE9FA /* Build configuration list for PBXProject "TouchPhoto" */;
 			compatibilityVersion = "Xcode 3.2";
