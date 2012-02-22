@@ -243,7 +243,13 @@ static float const projectionFar = 10.0;
                                                            - _panY * 2/ (self.view.frame.size.width),
                                                            -1);
 
-    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, GLKMathDegreesToRadians(_rotation), 0, 0, 1);    
+//    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, GLKMathDegreesToRadians(10), 0, 0, 1);    
+    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _rotation, 0, 0, 1);
+//    if (_rotation > 0) {
+//        modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _rotation, 0, 0, 1);
+////        _rotation = 0;        
+//    }
+
     //KONG: we can use GLKMatrix4RotateZ, too
     
     modelViewMatrix = GLKMatrix4Scale(modelViewMatrix, _zooming, _zooming, 1);
@@ -257,6 +263,34 @@ static float const projectionFar = 10.0;
     float y = pointB.y - pointA.y;
     return sqrt(x * x + y * y);
 }
+
+- (CGPoint)vectorFrom:(CGPoint)pointA to:(CGPoint)pointB {
+    return CGPointMake(pointB.x - pointA.x, pointB.y - pointA.y);
+}
+
+- (CGFloat)angleFrom:(CGPoint)vectorA to:(CGPoint)vectorB {
+    // dot product of the 2 vectors
+    float dotProduct = vectorA.x * vectorB.x + vectorA.y * vectorB.y;   
+    // product of the squared lengths
+    float productOfLenghs = sqrt((vectorA.x * vectorA.x + vectorA.y * vectorA.y) * (vectorB.x * vectorB.x + vectorB.y * vectorB.y));
+    
+    
+    CGFloat angle;
+    if (productOfLenghs == 0) {
+        angle = 0;
+    } else {
+        angle = acos(dotProduct / productOfLenghs);
+    }
+    
+    NSLog(@"angle: %f", GLKMathRadiansToDegrees(angle));
+    
+    return angle;
+}
+
+- (CGPoint)translatePoint:(CGPoint)point withVector:(CGPoint)vector {
+    return CGPointMake(point.x + vector.x, point.y + vector.y);
+}
+
 
 - (CGPoint)pointWithCameraEffect:(CGPoint)location {
     //KONG: 3 transformation:
@@ -344,10 +378,9 @@ static const CGFloat kZoomMinScale = 0.8;
 
 }
 
-
-
-- (void)rotateWithAngle:(float)degree {
-    NSLog(@"rotateWithAngle: %f", degree);
+- (void)rotateWithAngle:(float)radian {
+    NSLog(@"rotateWithAngle: %f", radian);
+    _rotation += radian;
     
 }
 
@@ -355,7 +388,8 @@ static const CGFloat kZoomMinScale = 0.8;
     NSLog(@"touchesBegan: %@", NSStringFromCGPoint([[touches anyObject] locationInView:self.view]));
 //    [self zoomAtPoint:CGPointMake(_screenSize.width/2, _screenSize.height/2) scale:1.5];
 //    [self zoomAtPoint:CGPointMake(0, 0) scale:1.5];    
-    [self zoomAtPoint:[[touches anyObject] locationInView:self.view] scale:1.5];        
+//    [self zoomAtPoint:[[touches anyObject] locationInView:self.view] scale:1.5];        
+//    [self rotateWithAngle:30];
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -370,7 +404,6 @@ static const CGFloat kZoomMinScale = 0.8;
         CGPoint pointA = [touch previousLocationInView:self.view];
         [self panWithVector:CGPointMake(pointA_.x - pointA.x, pointA_.y - pointA.y)];
     } else if ([touches count] == 2) {
-//        return;
         
         UITouch *touchA = [[touches allObjects] objectAtIndex:0];
         UITouch *touchB = [[touches allObjects] objectAtIndex:1];
@@ -380,11 +413,39 @@ static const CGFloat kZoomMinScale = 0.8;
         
         CGPoint pointB_ = [touchB locationInView:self.view];
         CGPoint pointB = [touchB previousLocationInView:self.view];
+
         
-        //- Second, move B1 to B2 by using a resize with origin in A’, scale A’B2/A’B1
-        CGFloat scale = [self distanceFrom:pointA_ to:pointB_] / [self distanceFrom:pointA to:pointB];
+        //KONG: test
+//        CGPoint pointA_ = CGPointMake(0, 0);
+//        CGPoint pointA = CGPointMake(0, 0);
+//        
+//        CGPoint pointB_ = CGPointMake(10, 0);
+//        CGPoint pointB = CGPointMake(10, 10);
+
         
+        
+        //- First. move A to A’ by using a Translation with vector AA’, B is also moved to B1
+        CGPoint vectorAA_ = [self vectorFrom:pointA to:pointA_];
+        [self panWithVector:vectorAA_];
+        
+        // Calculate B1
+        CGPoint pointB1 = [self translatePoint:pointB withVector:vectorAA_];
+        
+        //- Second, move B1 to B2 by using a resize with origin in A’, scale A’B'/A’B1
+        CGFloat scale = [self distanceFrom:pointA_ to:pointB_] / [self distanceFrom:pointA_ to:pointB1];
         [self zoomAtPoint:pointA_ scale:scale];
+
+        
+        // Calculate pointB2: vectorA_B2 = scale * vector A_B1
+//        CGPoint pointB2;
+//        pointB2.x = scale * (pointB1.x - pointA_.x) + pointA_.x;
+//        pointB2.y = scale * (pointB1.y - pointA_.y) + pointA_.y;
+        
+        //- Finally, use a Rotation with origin A’, angle (A’B2, A’B') to make vector A’B2 to same direction with A’B', B2 is moved to B’
+        CGPoint vectorAB = [self vectorFrom:pointA to:pointB];
+        CGPoint vectorA_B_ = [self vectorFrom:pointA_ to:pointB_];        
+//        [self rotateWithAngle:[self angleFrom:vectorA_B_ to:vectorAB]];
+        [self rotateWithAngle:[self angleFrom:vectorAB to:vectorA_B_]];        
     }
     
 }
