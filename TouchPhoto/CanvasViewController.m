@@ -2,7 +2,7 @@
 //  CanvasViewController.m
 //  TouchPhoto
 //
-//  Created by Vo Thanh Cong on 2/21/12.
+//  Created by Cong Vo @ http://kong.vn on 2/21/12.
 //  Copyright (c) 2012 BeeDream Studios. All rights reserved.
 //
 
@@ -65,6 +65,14 @@ const GLubyte Indices[] = {
     return self;
 }
 
+- (void)resetTransform {
+    _rotation = 0;
+    _zooming = 1;
+    _panX = 0;
+    _panY = 0;
+}
+
+
 - (void)didReceiveMemoryWarning
 {
     // Releases the view if it doesn't have a superview.
@@ -73,25 +81,9 @@ const GLubyte Indices[] = {
     // Release any cached data, images, etc that aren't in use.
 }
 
-#pragma mark Transforming
-
-- (void)resetTransform {
-    _rotation = 0;
-    _zooming = 1;
-//    _zooming = 1;    
-    _panX = 0;
-    _panY = 0;
-}
-
 
 #pragma mark - View lifecycle
 
-/*
-// Implement loadView to create a view hierarchy programmatically, without using a nib.
-- (void)loadView
-{
-}
-*/
 - (void)setupGL {
     //KONG: move from const in header into this method, so that we can modify it to fit image's width/height
     Vertex Vertices[] = {
@@ -222,8 +214,6 @@ const GLubyte Indices[] = {
 
 
 #pragma mark - GLKViewControllerDelegate
-static float const projectionNear = 0;
-static float const projectionFar = 10.0;
 
 - (void)update {
     
@@ -268,42 +258,20 @@ static float const projectionFar = 10.0;
     return CGPointMake(pointB.x - pointA.x, pointB.y - pointA.y);
 }
 
-//- (CGFloat)angleFrom:(CGPoint)vectorA to:(CGPoint)vectorB {
-//    // dot product of the 2 vectors
-//    float dotProduct = vectorA.x * vectorB.x + vectorA.y * vectorB.y;   
-//    // product of the squared lengths
-//    float productOfLenghs = sqrt((vectorA.x * vectorA.x + vectorA.y * vectorA.y) * (vectorB.x * vectorB.x + vectorB.y * vectorB.y));
-//    
-//    
-//    CGFloat angle;
-//    if (productOfLenghs == 0) {
-//        angle = 0;
-//    } else {
-//        angle = acos(dotProduct / productOfLenghs);
-//    }
-//    
-//    NSLog(@"angle: %f", GLKMathRadiansToDegrees(angle));
-//    
-//    return angle;
-//}
-
 - (CGFloat)angleFrom:(CGPoint)vectorA to:(CGPoint)vectorB {
-    // dot product of the 2 vectors
-
-    CGFloat angle1 = atan2(vectorA.y, vectorA.x);
-    NSLog(@"angle1: %f", GLKMathRadiansToDegrees(angle1));    
-    CGFloat angle2 = atan2(vectorB.y, vectorB.x);    
-    NSLog(@"angle2: %f", GLKMathRadiansToDegrees(angle2));    
+    // angle of 2 relative to 1= atan2(v2.y,v2.x) - atan2(v1.y,v1.x)
+    //link: http://www.euclideanspace.com/maths/algebra/vectors/angleBetween/index.htm
     
+    CGFloat angle1 = atan2(vectorA.y, vectorA.x);
+    CGFloat angle2 = atan2(vectorB.y, vectorB.x);
     CGFloat angle = angle1 - angle2;
-    NSLog(@"angle: %f", GLKMathRadiansToDegrees(angle));
+//    NSLog(@"angle: %f", GLKMathRadiansToDegrees(angle));
     return angle;
 }
 
 - (CGPoint)translatePoint:(CGPoint)point withVector:(CGPoint)vector {
     return CGPointMake(point.x + vector.x, point.y + vector.y);
 }
-
 
 - (CGPoint)pointWithCameraEffect:(CGPoint)location {
     //KONG: 3 transformation:
@@ -334,7 +302,6 @@ static float const projectionFar = 10.0;
     return location;
 }
 
-
 - (CGPoint)convertToGL:(CGPoint)uiPoint {
 	float newY = _screenSize.height - uiPoint.y;
     CGPoint glPoint = CGPointMake(uiPoint.x, newY );
@@ -345,7 +312,6 @@ static float const projectionFar = 10.0;
     CGPoint uiPoint = CGPointMake(glPoint.x, glPoint.y);
 	float newY = _screenSize.height - uiPoint.y;
     uiPoint = CGPointMake(uiPoint.x, newY);
-    
 	return uiPoint;
 }
 
@@ -355,11 +321,10 @@ static float const projectionFar = 10.0;
 //    NSLog(@"panWithVector: %@", NSStringFromCGPoint(vector));    
     _panX += (float)vector.x;
     _panY += (float)vector.y;
-//    NSLog(@"panWithVector: %f %f", _panX, _panY);       
 }
 
 static const CGFloat kZoomMaxScale = 5;
-static const CGFloat kZoomMinScale = 0.8;
+static const CGFloat kZoomMinScale = 0.2;
 
 - (void)zoomAtPoint:(CGPoint)center scale:(CGFloat)scale {
     NSLog(@"zoomAtPoint: %@ scale: %f", NSStringFromCGPoint(center), scale);
@@ -380,15 +345,14 @@ static const CGFloat kZoomMinScale = 0.8;
     //KONG: moving Ao back to A
     [self panWithVector:CGPointMake((A_w.x - Ao_w.x), (A_w.y - Ao_w.y))];
     
-    
     _zooming *= scale;
     
     if (_zooming < kZoomMinScale) {
         _zooming = kZoomMinScale;
     } else if (_zooming > kZoomMaxScale) {
-      //  _zooming = kZoomMaxScale;
+        //KONG: maybe no maximum limitation
+        //  _zooming = kZoomMaxScale;
     }
-
 }
 
 - (void)rotateWithAngle:(float)radian {
@@ -398,58 +362,17 @@ static const CGFloat kZoomMinScale = 0.8;
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {	
-    NSLog(@"touchesBegan: %@", NSStringFromCGPoint([[touches anyObject] locationInView:self.view]));
-//    [self zoomAtPoint:CGPointMake(_screenSize.width/2, _screenSize.height/2) scale:1.5];
-//    [self zoomAtPoint:CGPointMake(0, 0) scale:1.5];    
-//    [self zoomAtPoint:[[touches anyObject] locationInView:self.view] scale:1.5];        
-//    [self rotateWithAngle:30];
+
+    
+    //KONG: play with touches and event
+    NSLog(@"touchesBegan: %@", NSStringFromCGPoint([[touches anyObject] locationInView:self.view]));    
     NSLog(@"touches: %d", [touches count]);
-    NSLog(@"event: %d", [[event allTouches] count]);
-    return;
+    NSLog(@"event: %d", [[event allTouches] count]);  
     
-    //KONG: test
-//    CGPoint pointA = CGPointMake(0, 0);    
-//    CGPoint pointB = CGPointMake(10, 0);
-//    
-//    CGPoint pointA_ = CGPointMake(0, 0);
-//    CGPoint pointB_ = CGPointMake(10, 10);
-
-
-    CGPoint pointA = CGPointMake(0, 0);    
-    CGPoint pointB = CGPointMake(10, 10);
-    
-    CGPoint pointA_ = CGPointMake(0, 0);
-    CGPoint pointB_ = CGPointMake(10, 0);
-
-    
-    
-    //- First. move A to A’ by using a Translation with vector AA’, B is also moved to B1
-    CGPoint vectorAA_ = [self vectorFrom:pointA to:pointA_];
-    [self panWithVector:vectorAA_];
-    
-    // Calculate B1
-    CGPoint pointB1 = [self translatePoint:pointB withVector:vectorAA_];
-    
-    //- Second, move B1 to B2 by using a resize with origin in A’, scale A’B'/A’B1
-    CGFloat scale = [self distanceFrom:pointA_ to:pointB_] / [self distanceFrom:pointA_ to:pointB1];
-    [self zoomAtPoint:pointA_ scale:scale];
-    
-    
-    // Calculate pointB2: vectorA_B2 = scale * vector A_B1
-    //        CGPoint pointB2;
-    //        pointB2.x = scale * (pointB1.x - pointA_.x) + pointA_.x;
-    //        pointB2.y = scale * (pointB1.y - pointA_.y) + pointA_.y;
-    
-    //- Finally, use a Rotation with origin A’, angle (A’B2, A’B') to make vector A’B2 to same direction with A’B', B2 is moved to B’
-    CGPoint vectorAB = [self vectorFrom:pointA to:pointB];
-    CGPoint vectorA_B_ = [self vectorFrom:pointA_ to:pointB_];        
-    //        [self rotateWithAngle:[self angleFrom:vectorA_B_ to:vectorAB]];
-    [self rotateWithAngle:[self angleFrom:vectorAB to:vectorA_B_]];    
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-//    NSLog(@"touchesMoved: %@", touches);    
-//    return;
+//    NSLog(@"touchesMoved: %@", touches);
 
     //KONG: move from point A to A_
     NSArray *allTouches = [[event allTouches] allObjects];
@@ -478,8 +401,6 @@ static const CGFloat kZoomMinScale = 0.8;
 //        CGPoint pointB_ = CGPointMake(10, 0);
 //        CGPoint pointB = CGPointMake(10, 10);
 
-        
-        
         //- First. move A to A’ by using a Translation with vector AA’, B is also moved to B1
         CGPoint vectorAA_ = [self vectorFrom:pointA to:pointA_];
         [self panWithVector:vectorAA_];
@@ -491,16 +412,10 @@ static const CGFloat kZoomMinScale = 0.8;
         CGFloat scale = [self distanceFrom:pointA_ to:pointB_] / [self distanceFrom:pointA_ to:pointB1];
         [self zoomAtPoint:pointA_ scale:scale];
 
-        
-        // Calculate pointB2: vectorA_B2 = scale * vector A_B1
-//        CGPoint pointB2;
-//        pointB2.x = scale * (pointB1.x - pointA_.x) + pointA_.x;
-//        pointB2.y = scale * (pointB1.y - pointA_.y) + pointA_.y;
-        
-        //- Finally, use a Rotation with origin A’, angle (A’B2, A’B') to make vector A’B2 to same direction with A’B', B2 is moved to B’
+                
+        //- Finally, use a Rotation with origin A’, angle (AB, A’B') to make vector A’B2 to same direction with A’B', B2 is moved to B’
         CGPoint vectorAB = [self vectorFrom:pointA to:pointB];
         CGPoint vectorA_B_ = [self vectorFrom:pointA_ to:pointB_];        
-//        [self rotateWithAngle:[self angleFrom:vectorA_B_ to:vectorAB]];
         [self rotateWithAngle:[self angleFrom:vectorAB to:vectorA_B_]];        
     }
     

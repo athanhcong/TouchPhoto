@@ -2,7 +2,7 @@
 //  AppDelegate.h
 //  TouchPhoto
 //
-//  Created by Vo Thanh Cong on 2/21/12.
+//  Created by Cong Vo @ http://kong.vn on 2/21/12.
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
